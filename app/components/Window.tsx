@@ -1,49 +1,74 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import dynamic from "next/dynamic";
+import { useState, useRef, useEffect } from "react";
+import { motion, useMotionValue } from "framer-motion";
+import useGenieEffect from "../../hooks/useGenieEffect";
+import useOrigin from "../../hooks/useOrigin";
 
 interface WindowProps {
-  appId: string;
+  appName: string;
   onClose: () => void;
 }
 
-const Window: React.FC<WindowProps> = ({ appId, onClose }) => {
-  const [AppComponent, setAppComponent] = useState<React.ComponentType | null>(
-    null
-  );
+const Window: React.FC<WindowProps> = ({ appName, onClose }) => {
+  const [isFullscreen, setIsFullscreen] = useState(true);
+  const windowRef = useRef<HTMLDivElement>(null);
+  const originX = useMotionValue(0);
+  const originY = useMotionValue(0);
+
+  const { setOrigin } = useOrigin();
+  const { genieEffect, isAnimating } = useGenieEffect();
 
   useEffect(() => {
-    const loadApp = async () => {
-      try {
-        const module = await import(`../apps/${appId}/App`);
-        setAppComponent(() => module.default);
-      } catch (error) {
-        console.error(`Failed to load app: ${appId}`, error);
-      }
-    };
+    if (windowRef.current) {
+      const rect = windowRef.current.getBoundingClientRect();
+      setOrigin({ x: rect.left, y: rect.top });
+    }
+  }, [setOrigin]);
 
-    loadApp();
-  }, [appId]);
+  const handleClose = () => {
+    genieEffect(windowRef.current, () => {
+      onClose();
+    });
+  };
 
   return (
     <motion.div
-      initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      exit={{ scale: 0.8, opacity: 0 }}
-      className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+      ref={windowRef}
+      className="absolute top-0 left-0 w-full h-full bg-white rounded-lg overflow-hidden shadow-lg"
+      style={{
+        originX,
+        originY,
+        display: isAnimating ? "block" : "flex",
+        flexDirection: "column",
+      }}
+      initial={{ scale: 0 }}
+      animate={{ scale: 1 }}
+      exit={{ scale: 0 }}
     >
-      <div className="mockup-window border border-[#292929] bg-[#010203] bg-opacity-69 w-[800px] h-[600px]">
-        <div className="absolute top-0 left-0 flex gap-2 p-4">
+      {/* Window Top Bar */}
+      <div className="h-8 bg-gray-200 flex items-center px-2">
+        <div className="flex space-x-2">
           <button
-            className="w-3 h-3 rounded-full bg-[#FF5F57]"
-            onClick={onClose}
+            className="w-3 h-3 rounded-full bg-red-500"
+            onClick={handleClose}
           />
-          <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
-          <div className="w-3 h-3 rounded-full bg-[#28C840]" />
+          <button className="w-3 h-3 rounded-full bg-yellow-500" />
+          <button
+            className="w-3 h-3 rounded-full bg-green-500"
+            onClick={() => setIsFullscreen(!isFullscreen)}
+          />
         </div>
-        <div className="p-4 mt-8">
-          {AppComponent ? <AppComponent /> : <div>Loading app...</div>}
+        <div className="flex-grow text-center text-sm font-medium">
+          {appName}
         </div>
+      </div>
+
+      {/* App Content */}
+      <div className="flex-grow overflow-auto">
+        <iframe
+          src={`../apps/${appName}`}
+          className="w-full h-full border-none"
+          title={appName}
+        />
       </div>
     </motion.div>
   );

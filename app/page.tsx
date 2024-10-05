@@ -2,7 +2,7 @@ import Desktop from "@os/components/Desktop";
 
 export default function Home() {
   return (
-    <main>
+    <main className="h-screen w-screen overflow-hidden">
       <Desktop />
     </main>
   );

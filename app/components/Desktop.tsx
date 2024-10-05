@@ -4,34 +4,38 @@ import { useState } from "react";
 import Dock from "./Dock";
 import Window from "./Window";
 
-const Desktop = () => {
+const Desktop: React.FC = () => {
   const [openApps, setOpenApps] = useState<string[]>([]);
 
-  const openApp = (appId: string) => {
-    if (!openApps.includes(appId)) {
-      setOpenApps([...openApps, appId]);
+  const openApp = (appName: string) => {
+    if (!openApps.includes(appName)) {
+      setOpenApps([...openApps, appName]);
     }
   };
 
-  const closeApp = (appId: string) => {
-    setOpenApps(openApps.filter((app) => app !== appId));
+  const closeApp = (appName: string) => {
+    setOpenApps(openApps.filter((app) => app !== appName));
   };
 
   return (
     <div className="relative w-screen h-screen overflow-hidden">
-      {/* Background Video */}
+      {/* Animated Background */}
       <video
         autoPlay
         loop
         muted
-        className="absolute top-0 left-0 min-w-full min-h-full object-cover z-0"
+        className="absolute top-0 left-0 w-full h-full object-cover"
       >
         <source src="/media/BlackWaves.mp4" type="video/mp4" />
       </video>
 
-      {/* Open Windows */}
-      {openApps.map((appId) => (
-        <Window key={appId} appId={appId} onClose={() => closeApp(appId)} />
+      {/* App Windows */}
+      {openApps.map((appName) => (
+        <Window
+          key={appName}
+          appName={appName}
+          onClose={() => closeApp(appName)}
+        />
       ))}
 
       {/* Dock */}

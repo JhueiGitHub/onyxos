@@ -1,40 +1,39 @@
-import { useCallback } from "react";
-import { animate, useMotionValue, MotionValue } from "framer-motion";
+import { useCallback, useState } from "react";
+import { animate, useMotionValue } from "framer-motion";
 
 const useGenieEffect = () => {
+  const [isAnimating, setIsAnimating] = useState(false);
   const scale = useMotionValue(1);
-  const y = useMotionValue(0);
 
-  const animateIcon = useCallback(
-    (ref: React.RefObject<HTMLElement>, onComplete: () => void) => {
-      const element = ref.current;
+  const genieEffect = useCallback(
+    (element: HTMLElement | null, onComplete: () => void) => {
       if (!element) return;
 
-      const rect = element.getBoundingClientRect();
-      const startY = rect.top + rect.height / 2;
-      const endY = window.innerHeight - 50; // Adjust based on your dock position
+      setIsAnimating(true);
 
-      const animation = animate(y, [0, endY - startY, 0], {
+      const rect = element.getBoundingClientRect();
+      const elementAspectRatio = rect.width / rect.height;
+
+      animate(scale, 0, {
         duration: 0.5,
         onUpdate: (latest) => {
           if (element) {
-            element.style.transform = `translateY(${latest}px) scale(${scale.get()})`;
+            element.style.width = `${rect.width * latest}px`;
+            element.style.height = `${
+              (rect.width * latest) / elementAspectRatio
+            }px`;
           }
         },
-      });
-
-      const scaleAnimation = animate(scale, [1, 0.5, 1], {
-        duration: 0.5,
-      });
-
-      Promise.all([animation, scaleAnimation]).then(() => {
-        onComplete();
+        onComplete: () => {
+          setIsAnimating(false);
+          onComplete();
+        },
       });
     },
-    [scale, y]
+    [scale]
   );
 
-  return { animateIcon };
+  return { genieEffect, isAnimating };
 };
 
 export default useGenieEffect;
