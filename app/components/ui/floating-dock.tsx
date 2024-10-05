@@ -1,9 +1,4 @@
-/**
- * Note: Use position fixed according to your needs
- * Desktop navbar is better positioned at the bottom
- * Mobile navbar is better positioned at bottom right.
- **/
-
+// components/floating-dock.tsx
 import { cn } from "@/lib/utils";
 import { IconLayoutNavbarCollapse } from "@tabler/icons-react";
 import {
@@ -14,41 +9,51 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
-import Link from "next/link";
 import { useRef, useState } from "react";
 
 interface DockItem {
   title: string;
   icon: React.ReactNode;
   href: string;
-  onClick?: () => void;
+  appName: string;
+}
+
+interface FloatingDockProps {
+  items: DockItem[];
+  onItemClick: (item: DockItem, event: React.MouseEvent) => void;
+  desktopClassName?: string;
+  mobileClassName?: string;
 }
 
 export const FloatingDock = ({
   items,
+  onItemClick,
   desktopClassName,
   mobileClassName,
-}: {
-  items: DockItem[];
-  desktopClassName?: string;
-  mobileClassName?: string;
-}) => {
+}: FloatingDockProps) => {
   return (
     <>
       <FloatingDockDesktop
         items={items}
+        onItemClick={onItemClick}
         className={desktopClassName}
       />
-      <FloatingDockMobile items={items} className={mobileClassName} />
+      <FloatingDockMobile
+        items={items}
+        onItemClick={onItemClick}
+        className={mobileClassName}
+      />
     </>
   );
 };
 
 const FloatingDockMobile = ({
   items,
+  onItemClick,
   className,
 }: {
   items: DockItem[];
+  onItemClick: (item: DockItem, event: React.MouseEvent) => void;
   className?: string;
 }) => {
   const [open, setOpen] = useState(false);
@@ -77,14 +82,12 @@ const FloatingDockMobile = ({
                 }}
                 transition={{ delay: (items.length - 1 - idx) * 0.05 }}
               >
-                <Link
-                  href={item.href}
-                  key={item.title}
+                <button
+                  onClick={(e) => onItemClick(item, e)}
                   className="h-10 w-10 rounded-full bg-gray-50 dark:bg-neutral-900 flex items-center justify-center"
-                  onClick={item.onClick}
                 >
                   <div className="h-4 w-4">{item.icon}</div>
-                </Link>
+                </button>
               </motion.div>
             ))}
           </motion.div>
@@ -102,9 +105,11 @@ const FloatingDockMobile = ({
 
 const FloatingDockDesktop = ({
   items,
+  onItemClick,
   className,
 }: {
   items: DockItem[];
+  onItemClick: (item: DockItem, event: React.MouseEvent) => void;
   className?: string;
 }) => {
   let mouseX = useMotionValue(Infinity);
@@ -119,9 +124,10 @@ const FloatingDockDesktop = ({
     >
       {items.map((item) => (
         <IconContainer
-          key={item.title}
           mouseX={mouseX}
-          {...item}
+          key={item.title}
+          item={item}
+          onItemClick={onItemClick}
         />
       ))}
     </motion.div>
@@ -130,16 +136,12 @@ const FloatingDockDesktop = ({
 
 function IconContainer({
   mouseX,
-  title,
-  icon,
-  href,
-  onClick,
+  item,
+  onItemClick,
 }: {
-  mouseX: MotionValue<number>;
-  title: string;
-  icon: React.ReactNode;
-  href: string;
-  onClick?: () => void;
+  mouseX: MotionValue;
+  item: DockItem;
+  onItemClick: (item: DockItem, event: React.MouseEvent) => void;
 }) {
   let ref = useRef<HTMLDivElement>(null);
 
@@ -152,7 +154,11 @@ function IconContainer({
   let heightTransform = useTransform(distance, [-150, 0, 150], [40, 80, 40]);
 
   let widthTransformIcon = useTransform(distance, [-150, 0, 150], [20, 40, 20]);
-  let heightTransformIcon = useTransform(distance, [-150, 0, 150], [20, 40, 20]);
+  let heightTransformIcon = useTransform(
+    distance,
+    [-150, 0, 150],
+    [20, 40, 20]
+  );
 
   let width = useSpring(widthTransform, {
     mass: 0.1,
@@ -184,8 +190,8 @@ function IconContainer({
       style={{ width, height }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      onClick={onClick}
-      className="aspect-square rounded-full bg-[#292929] bg-opacity-81 flex items-center justify-center relative cursor-pointer"
+      onClick={(e) => onItemClick(item, e)}
+      className="aspect-square rounded-full bg-gray-200 dark:bg-neutral-800 flex items-center justify-center relative cursor-pointer"
     >
       <AnimatePresence>
         {hovered && (
@@ -195,12 +201,15 @@ function IconContainer({
             exit={{ opacity: 0, y: 2, x: "-50%" }}
             className="px-2 py-0.5 whitespace-pre rounded-md bg-gray-100 border dark:bg-neutral-800 dark:border-neutral-900 dark:text-white border-gray-200 text-neutral-700 absolute left-1/2 -translate-x-1/2 -top-8 w-fit text-xs"
           >
-            {title}
+            {item.title}
           </motion.div>
         )}
       </AnimatePresence>
-      <motion.div style={{ width: widthIcon, height: heightIcon }}>
-        {icon}
+      <motion.div
+        style={{ width: widthIcon, height: heightIcon }}
+        className="flex items-center justify-center"
+      >
+        {item.icon}
       </motion.div>
     </motion.div>
   );

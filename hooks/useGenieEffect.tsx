@@ -1,39 +1,47 @@
-import { useCallback, useState } from "react";
-import { animate, useMotionValue } from "framer-motion";
+// hooks/useGenieEffect.ts
+import { useSpring, useTransform, MotionValue } from 'framer-motion';
+import { useState, useEffect } from 'react';
 
-const useGenieEffect = () => {
-  const [isAnimating, setIsAnimating] = useState(false);
-  const scale = useMotionValue(1);
+interface Origin {
+  x: number;
+  y: number;
+}
 
-  const genieEffect = useCallback(
-    (element: HTMLElement | null, onComplete: () => void) => {
-      if (!element) return;
+export default function useGenieEffect(origin: Origin) {
+  const scale = useSpring(0, { stiffness: 300, damping: 30 });
+  const opacity = useTransform(scale, [0, 1], [0, 1]);
 
-      setIsAnimating(true);
+  const [isClosing, setIsClosing] = useState(false);
 
-      const rect = element.getBoundingClientRect();
-      const elementAspectRatio = rect.width / rect.height;
+  const genieStyles = {
+    scale,
+    opacity,
+  };
 
-      animate(scale, 0, {
-        duration: 0.5,
-        onUpdate: (latest) => {
-          if (element) {
-            element.style.width = `${rect.width * latest}px`;
-            element.style.height = `${
-              (rect.width * latest) / elementAspectRatio
-            }px`;
-          }
-        },
-        onComplete: () => {
-          setIsAnimating(false);
-          onComplete();
-        },
+  const playGenieAnimation = (reverse: boolean = false) => {
+    return new Promise<void>((resolve) => {
+      setIsClosing(reverse);
+      const duration = 0.5;
+
+      if (reverse) {
+        scale.set(1);
+      }
+
+      scale.set(reverse ? 0 : 1);
+      scale.onChange(() => {
+        if (scale.get() === (reverse ? 0 : 1)) {
+          setIsClosing(false);
+          resolve();
+        }
       });
-    },
-    [scale]
-  );
+    });
+  };
 
-  return { genieEffect, isAnimating };
-};
+  useEffect(() => {
+    if (!isClosing) {
+      scale.set(0);
+    }
+  }, [isClosing, scale]);
 
-export default useGenieEffect;
+  return { genieStyles, playGenieAnimation };
+}

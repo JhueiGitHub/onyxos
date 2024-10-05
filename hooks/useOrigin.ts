@@ -1,3 +1,4 @@
+// hooks/useOrigin.ts
 import { useState, useCallback } from "react";
 
 interface Origin {
@@ -5,14 +6,18 @@ interface Origin {
   y: number;
 }
 
-const useOrigin = () => {
+export default function useOrigin() {
   const [origin, setOrigin] = useState<Origin>({ x: 0, y: 0 });
 
-  const setOriginFromEvent = useCallback((event: React.MouseEvent) => {
-    setOrigin({ x: event.clientX, y: event.clientY });
+  const updateOrigin = useCallback((event: MouseEvent) => {
+    const { clientX, clientY } = event;
+    const { innerWidth, innerHeight } = window;
+
+    setOrigin({
+      x: clientX / innerWidth,
+      y: clientY / innerHeight,
+    });
   }, []);
 
-  return { origin, setOrigin, setOriginFromEvent };
-};
-
-export default useOrigin;
+  return { origin, updateOrigin };
+}

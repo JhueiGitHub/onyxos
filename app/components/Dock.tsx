@@ -1,27 +1,28 @@
-import { IconApps } from "@tabler/icons-react";
+// components/Dock.tsx
 import { FloatingDock } from "./ui/floating-dock";
+import { IconHome, IconSettings } from "@tabler/icons-react";
 
 interface DockProps {
-  openApp: (appName: string) => void;
+  onOpenApp: (appName: string, event: React.MouseEvent) => void;
 }
 
-const Dock: React.FC<DockProps> = ({ openApp }) => {
-  const items = [
+export default function Dock({ onOpenApp }: DockProps) {
+  const dockItems = [
+    { title: "Home", icon: <IconHome />, href: "#", appName: "placeholder" },
     {
-      title: "Placeholder App",
-      icon: <IconApps />,
+      title: "Settings",
+      icon: <IconSettings />,
       href: "#",
-      onClick: () => openApp("placeholder"),
+      appName: "placeholder",
     },
-    // Add more app items here
   ];
 
   return (
     <FloatingDock
-      items={items}
+      items={dockItems}
+      onItemClick={(item, event) => onOpenApp(item.appName, event)}
       desktopClassName="fixed bottom-4 left-1/2 transform -translate-x-1/2"
+      mobileClassName="fixed bottom-4 right-4"
     />
   );
-};
-
-export default Dock;
+}

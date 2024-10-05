@@ -1,25 +1,29 @@
+// components/Desktop.tsx
 "use client";
 
 import { useState } from "react";
 import Dock from "./Dock";
 import Window from "./Window";
+import useOrigin from "@/hooks/useOrigin";
 
-const Desktop: React.FC = () => {
+export default function Desktop() {
   const [openApps, setOpenApps] = useState<string[]>([]);
+  const { origin, updateOrigin } = useOrigin();
 
-  const openApp = (appName: string) => {
+  const handleOpenApp = (appName: string, event: React.MouseEvent) => {
     if (!openApps.includes(appName)) {
+      updateOrigin(event.nativeEvent);
       setOpenApps([...openApps, appName]);
     }
   };
 
-  const closeApp = (appName: string) => {
+  const handleCloseApp = (appName: string) => {
     setOpenApps(openApps.filter((app) => app !== appName));
   };
 
   return (
     <div className="relative w-screen h-screen overflow-hidden">
-      {/* Animated Background */}
+      {/* Animated background */}
       <video
         autoPlay
         loop
@@ -29,19 +33,18 @@ const Desktop: React.FC = () => {
         <source src="/media/BlackWaves.mp4" type="video/mp4" />
       </video>
 
-      {/* App Windows */}
+      {/* App windows */}
       {openApps.map((appName) => (
         <Window
           key={appName}
           appName={appName}
-          onClose={() => closeApp(appName)}
+          onClose={() => handleCloseApp(appName)}
+          origin={origin}
         />
       ))}
 
       {/* Dock */}
-      <Dock openApp={openApp} />
+      <Dock onOpenApp={handleOpenApp} />
     </div>
   );
-};
-
-export default Desktop;
+}
