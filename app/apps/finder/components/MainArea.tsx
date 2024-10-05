@@ -3,7 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Folder, File } from "@prisma/client";
-import { ContextMenu } from "./ContextMenu";
+import { ContextMenuWrapper } from "./ContextMenu";
 import { FolderComponent } from "./Folder";
 import { FileComponent } from "./File";
 import { FinderAction } from "@/app/types/finder";
@@ -13,7 +13,9 @@ interface MainAreaProps {
   files: File[];
   selectedItems: string[];
   onCreateFolder: (name: string, x: number, y: number) => void;
+  onCreateFile: (name: string, x: number, y: number) => void;
   onMoveFolder: (folderId: string, newPath: string) => void;
+  onRenameFolder: (folderId: string, newName: string) => void;
   dispatch: React.Dispatch<FinderAction>;
 }
 
@@ -22,12 +24,14 @@ export default function MainArea({
   files,
   selectedItems,
   onCreateFolder,
+  onCreateFile,
   onMoveFolder,
+  onRenameFolder,
   dispatch,
 }: MainAreaProps) {
   const handleContextMenu = (event: React.MouseEvent, itemId?: string) => {
     event.preventDefault();
-    // Implement context menu logic
+    // Additional context menu logic if needed
   };
 
   const handleDrop = (event: React.DragEvent, targetId: string) => {
@@ -45,7 +49,7 @@ export default function MainArea({
   };
 
   return (
-    <ContextMenu onCreateFolder={onCreateFolder}>
+    <ContextMenuWrapper onCreateFolder={onCreateFolder} onCreateFile={onCreateFile}>
       <motion.div
         className="flex-grow p-4 overflow-auto grid grid-cols-6 gap-4"
         onContextMenu={handleContextMenu}
@@ -65,6 +69,7 @@ export default function MainArea({
             }
             onContextMenu={handleContextMenu}
             onDrop={handleDrop}
+            onRename={(newName) => onRenameFolder(folder.id, newName)}
           />
         ))}
         {files.map((file) => (
@@ -80,6 +85,6 @@ export default function MainArea({
           />
         ))}
       </motion.div>
-    </ContextMenu>
+    </ContextMenuWrapper>
   );
 }

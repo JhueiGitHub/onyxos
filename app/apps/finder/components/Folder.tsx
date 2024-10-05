@@ -12,6 +12,7 @@ interface FolderProps {
   onDeselect: () => void;
   onContextMenu: (event: React.MouseEvent, itemId: string) => void;
   onDrop: (event: React.DragEvent, targetId: string) => void;
+  onRename: (newName: string) => void;
 }
 
 export function FolderComponent({
@@ -21,6 +22,7 @@ export function FolderComponent({
   onDeselect,
   onContextMenu,
   onDrop,
+  onRename,
 }: FolderProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(folder.name);
@@ -41,12 +43,19 @@ export function FolderComponent({
     setName(event.target.value);
   };
 
-  const handleNameSubmit = () => {
+  const handleNameSubmit = async () => {
     setIsEditing(false);
-    // Implement folder rename logic
+    if (name !== folder.name) {
+      try {
+        onRename(name);
+      } catch (error) {
+        console.error("Error renaming folder:", error);
+        setName(folder.name); // Revert to original name on error
+      }
+    }
   };
 
-  const handleDragStart = (event: React.DragEvent) => {
+  const handleDragStart = (event: React.DragEvent<HTMLDivElement>) => {
     event.dataTransfer.setData("text/plain", folder.id);
   };
 
@@ -61,8 +70,12 @@ export function FolderComponent({
       onDoubleClick={handleDoubleClick}
       onContextMenu={(e) => onContextMenu(e, folder.id)}
       draggable
-      onDragStart={handleDragStart}
-      onDrop={(e) => onDrop(e, folder.id)}
+      onDragStart={(e) =>
+        handleDragStart(e as unknown as React.DragEvent<HTMLDivElement>)
+      }
+      onDrop={(e) =>
+        onDrop(e as unknown as React.DragEvent<HTMLDivElement>, folder.id)
+      }
       onDragOver={(e) => e.preventDefault()}
     >
       <div className="flex flex-col items-center">

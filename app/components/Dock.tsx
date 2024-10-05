@@ -8,7 +8,7 @@ interface DockProps {
 
 export default function Dock({ onOpenApp }: DockProps) {
   const dockItems = [
-    { title: "Home", icon: <IconHome />, href: "#", appName: "placeholder" },
+    { title: "Finder", icon: <IconHome />, href: "#", appName: "finder" },
     {
       title: "Settings",
       icon: <IconSettings />,

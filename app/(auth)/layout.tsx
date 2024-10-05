@@ -1,7 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import localFont from "next/font/local";
-import "../globals.css";
+import "../styles/globals.css";
 
 // Original functionality: Load ExemplarPro font
 const exemplarPro = localFont({
