@@ -7,11 +7,12 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        "underlying-bg": "#292929",
-        "overlaying-bg": "#010203",
-        border: "#292929",
-        glass: "#000000",
-        white: "#CCCCCC",
+        "underlying-bg": "rgba(41, 41, 41, 0.81)",
+        "overlaying-bg": "rgba(1, 2, 3, 0.69)",
+        border: "rgba(41, 41, 41, 0.81)",
+        black: "#000000",
+        glass: "rgba(0, 0, 0, 0.30)",
+        white: "rgba(204, 204, 204, 0.69)",
         active: "#28C840",
         warning: "#FEBC2E",
         error: "#FF5F57",
@@ -19,6 +20,10 @@ module.exports = {
         "teal-accent": "#003431",
         "text-primary": "#ABC4C3",
         "text-secondary": "#748393",
+      },
+      fontFamily: {
+        'primary': ['Arial', 'sans-serif'],
+        'secondary': ['Inter', 'sans-serif'],
       },
     },
   },

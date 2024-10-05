@@ -32,26 +32,26 @@ export default function Window({ appName, onClose, origin }: WindowProps) {
   return (
     <motion.div
       ref={windowRef}
-      className="absolute top-0 left-0 w-full h-full bg-white rounded-lg overflow-hidden shadow-lg"
+      className="absolute top-0 left-0 w-full h-full bg-overlaying-bg rounded-lg overflow-hidden shadow-lg border border-border"
       style={{
         ...genieStyles,
         originX: origin.x,
         originY: origin.y,
       }}
     >
-      <div className="h-8 bg-gray-200 flex items-center px-2">
+      <div className="h-8 bg-glass flex items-center px-2">
         <div className="flex space-x-2">
           <button
-            className="w-3 h-3 rounded-full bg-red-500"
+            className="w-3 h-3 rounded-full bg-error"
             onClick={handleClose}
           ></button>
-          <button className="w-3 h-3 rounded-full bg-yellow-500"></button>
+          <button className="w-3 h-3 rounded-full bg-warning"></button>
           <button
-            className="w-3 h-3 rounded-full bg-green-500"
+            className="w-3 h-3 rounded-full bg-active"
             onClick={() => setIsFullscreen(!isFullscreen)}
           ></button>
         </div>
-        <div className="flex-grow text-center text-sm font-medium">
+        <div className="flex-grow text-center text-sm font-medium text-white">
           {appName}
         </div>
       </div>
