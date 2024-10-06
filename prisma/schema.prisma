@@ -1,5 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// prisma/schema.prisma
 
 generator client {
   provider = "prisma-client-js"
@@ -11,37 +10,61 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  folders   Folder[]
-  files     File[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  folders       Folder[]
+  sidebarCategories SidebarCategory[]
 }
 
 model Folder {
-  id       String   @id @default(cuid())
-  name     String
-  path     String
-  user     User     @relation(fields: [userId], references: [id])
-  userId   String
-  parentId String?
-  parent   Folder?  @relation("SubFolders", fields: [parentId], references: [id])
-  children Folder[] @relation("SubFolders")
-  files    File[]
+  id        String   @id @default(cuid())
+  name      String
+  parentId  String?
+  parent    Folder?  @relation("FolderToFolder", fields: [parentId], references: [id], onDelete: Cascade)
+  children  Folder[] @relation("FolderToFolder")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  path      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  assets    Asset[]
+  sidebarItems SidebarItem[]
+  positionX Float?
+  positionY Float?
+}
+
+model Asset {
+  id        String   @id @default(cuid())
+  name      String
+  type      String
+  url       String
+  folderId  String
+  folder    Folder   @relation(fields: [folderId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model File {
-  id       String   @id @default(cuid())
-  name     String
-  path     String
-  user     User     @relation(fields: [userId], references: [id])
-  userId   String
-  folder   Folder   @relation(fields: [folderId], references: [id])
-  folderId String
+model SidebarCategory {
+  id        String   @id @default(cuid())
+  name      String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     SidebarItem[]
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SidebarItem {
+  id        String   @id @default(cuid())
+  folderId  String
+  folder    Folder   @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  categoryId String
+  category  SidebarCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  order     Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

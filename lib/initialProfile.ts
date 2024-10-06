@@ -7,6 +7,7 @@ import prisma from "@/lib/prisma";
 
 export const initialProfile = async () => {
   const user = await currentUser();
+  console.log("Current user:", user);
 
   if (!user) {
     return redirect("/sign-in");
@@ -17,11 +18,13 @@ export const initialProfile = async () => {
       email: user.emailAddresses[0].emailAddress,
     },
   });
+  console.log("Existing profile:", profile);
 
   if (profile) {
     return profile;
   }
 
+  console.log("Creating new profile...");
   const newProfile = await prisma.user.create({
     data: {
       email: user.emailAddresses[0].emailAddress,
@@ -44,6 +47,7 @@ export const initialProfile = async () => {
       },
     },
   });
+  console.log("New profile created:", newProfile);
 
   return newProfile;
 };
