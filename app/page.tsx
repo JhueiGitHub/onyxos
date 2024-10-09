@@ -1,9 +1,13 @@
-import Desktop from "@os/components/Desktop";
+// app/page.tsx
+import { redirect } from "next/navigation";
+import { db } from "@/lib/db";
+import { initialProfile } from "@/lib/initial-profile";
+import Desktop from "./components/Desktop";
 
-export default function Home() {
-  return (
-    <main className="h-screen w-screen overflow-hidden">
-      <Desktop />
-    </main>
-  );
-}
+const SetupPage = async () => {
+  const profile = await initialProfile();
+
+  return <Desktop />;
+};
+
+export default SetupPage;
